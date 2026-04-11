@@ -1,1 +1,14 @@
-{"rfcs": [], "next_number": 1}
+{
+  "rfcs": [
+    {
+      "number": 1,
+      "title": "FLUX Unified ISA Canonical Declaration",
+      "filename": "rfc/CANONICAL/0001-isa-canonical-declaration.md",
+      "status": "CANONICAL",
+      "author": "Quill",
+      "date": "2026-04-12",
+      "related_repos": ["flux-spec", "flux-runtime", "greenhorn-runtime", "flux-a2a-prototype"]
+    }
+  ],
+  "next_number": 2
+}
