@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: pip install pytest
+
+      - name: Run tests
+        run: python -m pytest tests/ -v --tb=short
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pytest
+
+      - name: Check import structure
+        run: python -c "from src.engine.rfc_engine import RFCEngine; from src.engine.conflict_resolver import ConflictResolver; from src.persistence.git_persistence import GitPersistence; print('All imports OK')"
+
+      - name: Validate RFC markdown files parse
+        run: python -c "
+import os, sys
+sys.path.insert(0, '.')
+from src.persistence.git_persistence import _parse_rfc_markdown
+for root, dirs, files in os.walk('rfc'):
+    for f in files:
+        if f.endswith('.md'):
+            path = os.path.join(root, f)
+            text = open(path).read()
+            data = _parse_rfc_markdown(text)
+            if 'number' in data:
+                print(f'  OK: {path} -> RFC-{data[\"number\"]:04d}')
+            else:
+                print(f'  SKIP (no number): {path}')
+print('RFC markdown validation complete')
+"
